@@ -71,6 +71,3 @@ Frontend (Next.js) <--> Backend (Express) <--> Database (future)
 
 API Docs: `/api-docs` (swagger UI)
 
-## Contact / ownership
-
-MealMagic Team — main contact: support@mealmagic.com
