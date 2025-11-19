@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
+dist/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Mac system files
+.DS_Store
+
+# Log files
+logs
+*.log
+log_*.txt
+
+# Editor files
+.vscode/
+.idea/
+
+# Cache
+.cache/
+.next/cache/
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Lock files (optional)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Storybook
+storybook-static/
+
+# Turbo repo
+.turbo/
+
+# Expo / React Native (in case)
+.expo/
+.expo-shared/
+
+# GitHub workflow cache
+*.tgz
+
+# Firebase
+.firebase/
