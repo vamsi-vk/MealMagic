@@ -7,17 +7,34 @@ const platesRouter = require('../routes/plates');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const SERVER_URL = process.env.VERCEL_URL 
-  ? `https://${process.env.VERCEL_URL}` 
-  : 'http://localhost:5000';
+const getServerUrl = (req) => {
+  if (req && req.headers) {
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    if (host) {
+      return `${protocol}://${host}`;
+    }
+  }
+  
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  return 'http://localhost:5000';
+};
 
 // Swagger configuration
-const swaggerOptions = {
+const getSwaggerOptions = (serverUrl) => ({
   definition: {
     openapi: '3.0.0',
     info: {
@@ -31,7 +48,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: SERVER_URL,
+        url: serverUrl,
         description: 'API Server',
       },
     ],
@@ -98,12 +115,14 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ['./routes/*.js', './backend/routes/*.js'],
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  apis: ['./routes/*.js', '../routes/*.js', './backend/routes/*.js'],
+});
 
 app.get('/', (req, res) => {
+  const serverUrl = getServerUrl(req);
+  const swaggerOptions = getSwaggerOptions(serverUrl);
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -156,6 +175,10 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/swagger.json', (req, res) => {
+  const serverUrl = getServerUrl(req);
+  const swaggerOptions = getSwaggerOptions(serverUrl);
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });

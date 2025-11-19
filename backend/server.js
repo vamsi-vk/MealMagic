@@ -6,16 +6,32 @@ const categoriesRouter = require('./routes/categories');
 const platesRouter = require('./routes/plates');
 
 const app = express();
-const PORT = process.env.PORT || 8000;
-const SERVER_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const getServerUrl = (req) => {
+  if (req && req.headers) {
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    if (host) {
+      return `${protocol}://${host}`;
+    }
+  }
+  return `http://localhost:${PORT}`;
+};
+
 // Swagger configuration
-const swaggerOptions = {
+const getSwaggerOptions = (serverUrl) => ({
   definition: {
     openapi: '3.0.0',
     info: {
@@ -29,7 +45,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: SERVER_URL,
+        url: serverUrl,
         description: 'API Server',
       },
     ],
@@ -159,11 +175,13 @@ const swaggerOptions = {
     },
   },
   apis: ['./routes/*.js'],
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+});
 
 const serveSwagger = (req, res) => {
+  const serverUrl = getServerUrl(req);
+  const swaggerOptions = getSwaggerOptions(serverUrl);
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -219,6 +237,10 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/swagger.json', (req, res) => {
+  const serverUrl = getServerUrl(req);
+  const swaggerOptions = getSwaggerOptions(serverUrl);
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });
