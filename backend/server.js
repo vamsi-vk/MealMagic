@@ -164,8 +164,16 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+
 // Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const swaggerUiOptions = {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'MealMagic API Documentation',
+};
+
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // Routes
 app.use('/api/meals', mealsRouter);
@@ -177,12 +185,13 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'MealMagic API is running' });
 });
 
-// Root route
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to MealMagic API',
-    documentation: `${SERVER_URL}/api-docs`,
-  });
+  res.redirect('/api-docs');
+});
+
+app.get('/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
 });
 
 // Error handling middleware
