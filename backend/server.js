@@ -8,6 +8,7 @@ const platesRouter = require('./routes/plates');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+const SERVER_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`;
 
 // Middleware
 app.use(cors());
@@ -29,8 +30,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${PORT}`,
-        description: 'Development server',
+        url: SERVER_URL,
+        description: 'API Server',
       },
     ],
     components: {
@@ -180,7 +181,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to MealMagic API',
-    documentation: `http://localhost:${PORT}/api-docs`,
+    documentation: `${SERVER_URL}/api-docs`,
   });
 });
 
@@ -191,9 +192,11 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 MealMagic API server running on http://localhost:${PORT}`);
-  console.log(`📚 API Documentation available at http://localhost:${PORT}/api-docs`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 MealMagic API server running on http://localhost:${PORT}`);
+    console.log(`📚 API Documentation available at http://localhost:${PORT}/api-docs`);
+  });
+}
 
 module.exports = app;
